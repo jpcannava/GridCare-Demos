@@ -88,7 +88,14 @@
 
   <div class="legend">
     <span class="legend-item"><span class="swatch" style="background:var(--green);"></span>Firm headroom</span>
-    <span class="legend-item"><span class="swatch" style="background:var(--red);"></span>Requested load, stacked</span>
+    <span class="legend-item">
+      <span style="display:flex;">
+        <span class="swatch" style="border-radius:2px 0 0 2px; background:var(--red);"></span>
+        <span class="swatch" style="border-radius:0; background:var(--red-light);"></span>
+        <span class="swatch" style="border-radius:0 2px 2px 0; background:var(--red-lighter);"></span>
+      </span>
+      Requested load, one shade per pending request, stacked oldest to newest
+    </span>
     <span class="legend-item"><span style="width:6px; height:14px; background:var(--text-primary); display:inline-block;"></span>Thermal limit</span>
   </div>
 
