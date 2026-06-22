@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feeder capacity planning — capacity dashboard (utility planner view)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #0E1A24;
+    --bg-card: #16242F;
+    --bg-card-2: #1C2C38;
+    --text-primary: #EDEEF0;
+    --text-secondary: #9AA7B0;
+    --text-tertiary: #6B7780;
+    --border: rgba(255,255,255,0.08);
+    --green: #639922;
+    --red: #E24B4A;
+    --red-light: #F09595;
+    --red-lighter: #F7C1C1;
+    --danger-text: #FCA5A5;
+    --radius-md: 8px;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0; display: inline; }
+  .subtitle { font-size: 13px; color: var(--text-secondary); margin-left: 8px; }
+  .timestamp { font-size: 12px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  .header-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .meta { font-size: 13px; color: var(--text-secondary); margin: 0 0 1.5rem; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stat-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--border); }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin: 0 0 4px; }
+  .stat-value { font-size: 22px; font-weight: 500; margin: 0; font-family: var(--font-mono); }
+  .stat-danger { color: var(--danger-text); }
+  .legend { display: flex; gap: 16px; align-items: center; margin-bottom: 0.75rem; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; }
+  .row {
+    display: grid; grid-template-columns: 110px 1fr 110px; align-items: center; gap: 12px;
+    padding: 10px 8px; border-top: 1px solid var(--border); cursor: pointer;
+  }
+  .row:hover { background: rgba(255,255,255,0.02); }
+  .row-name { font-size: 13px; font-weight: 500; }
+  .row-value { font-size: 13px; font-family: var(--font-mono); text-align: right; }
+  .row-danger { color: var(--danger-text); }
+  .bar-track { position: relative; height: 22px; background: var(--bg-card-2); border-radius: var(--radius-md); overflow: visible; }
+  .bar-firm { position: absolute; left: 0; top: 0; height: 100%; border-radius: var(--radius-md) 0 0 var(--radius-md); background: var(--green); }
+  .bar-limit { position: absolute; top: -3px; height: 28px; width: 2px; background: var(--text-primary); }
+  .hint { font-size: 12px; color: var(--text-tertiary); margin: 0.75rem 0 0; }
+  .lever-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem; }
+  .lever-title { font-size: 13px; font-weight: 500; margin: 0 0 8px; }
+  .lever-desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; }
+  .lever-row { display: flex; align-items: center; gap: 12px; }
+  .lever-label { font-size: 12px; color: var(--text-secondary); min-width: 130px; }
+  .lever-value { font-size: 12px; font-family: var(--font-mono); min-width: 30px; }
+  input[type="range"] { flex: 1; accent-color: var(--green); }
+  .footer-note { font-size: 11px; color: var(--text-tertiary); margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-row">
+    <div><h1>Feeder capacity planning</h1><span class="subtitle">Hillsboro, OR corridor</span></div>
+    <span class="timestamp">Prototype — illustrative data</span>
+  </div>
+  <p class="meta">5 feeders · sorted by tightest margin to thermal limit · utility planner view</p>
+
+  <div class="stats">
+    <div class="stat-card"><p class="stat-label">Feeders at risk</p><p class="stat-value stat-danger">2</p></div>
+    <div class="stat-card"><p class="stat-label">Pending requests, all feeders</p><p class="stat-value">11</p></div>
+    <div class="stat-card"><p class="stat-label">MW requested vs firm headroom</p><p class="stat-value">301 / 84</p></div>
+    <div class="stat-card"><p class="stat-label">Model confidence, system avg</p><p class="stat-value">91%</p></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="swatch" style="background:var(--green);"></span>Firm headroom</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--red);"></span>Requested load, stacked</span>
+    <span class="legend-item"><span style="width:6px; height:14px; background:var(--text-primary); display:inline-block;"></span>Thermal limit</span>
+  </div>
+
+  <div id="rows"></div>
+  <div class="lever-panel" id="lever-panel"></div>
+  <p class="hint" id="detail-hint">Click a feeder to see its request stack and adjust flexibility levers.</p>
+
+  <p class="footer-note">Prototype built to explore a utility-planner view of grid capacity data. Illustrative figures only, not real GridCARE platform data.</p>
+</div>
+
+<script>
+const feeders = [
+  { name: 'Cornelius Pass', limit: 90, firm: 28, requests: [18, 12, 9], confidence: 96, lever: 'No additional levers needed — firm capacity covers requests with margin.' },
+  { name: 'Brookwood', limit: 75, firm: 22, requests: [22, 14], confidence: 93, lever: 'Curtailment lever at 40 hrs/yr unlocks 18 MW. Currently dialed to 25 hrs/yr.' },
+  { name: 'Evergreen', limit: 68, firm: 18, requests: [26, 11, 8], confidence: 88, lever: '12 MW battery interconnection pending. Until commissioned, requested load exceeds firm headroom.' },
+  { name: 'North Plains', limit: 60, firm: 16, requests: [31, 19], confidence: 79, lever: 'Capacity is seasonal. Winter requests cannot be served without curtailment above policy limit.' },
+  { name: 'Helvetia', limit: 85, firm: 0, requests: [38, 22, 14, 9], confidence: 71, lever: 'Transformer upgrade required before any new load can be served. Recommend holding queue.' }
+];
+
+const rows = document.getElementById('rows');
+const colors = ['var(--red)', 'var(--red-light)', 'var(--red-lighter)'];
+
+feeders.forEach((f) => {
+  const totalRequested = f.requests.reduce((a,b) => a+b, 0);
+  const scale = f.limit * 1.15;
+  const firmPct = (f.firm / scale) * 100;
+  let cum = f.firm;
+  const segments = f.requests.map((r, idx) => {
+    const left = (cum / scale) * 100;
+    const width = (r / scale) * 100;
+    cum += r;
+    return `<div style="position:absolute; left:${left}%; top:0; height:100%; width:${width}%; background:${colors[idx % colors.length]};"></div>`;
+  }).join('');
+  const limitPct = (f.limit / scale) * 100;
+  const overLimit = totalRequested + f.firm > f.limit;
+
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `
+    <span class="row-name">${f.name}</span>
+    <div class="bar-track">
+      <div class="bar-firm" style="width:${firmPct}%;"></div>
+      ${segments}
+      <div class="bar-limit" style="left:${limitPct}%;"></div>
+    </div>
+    <span class="row-value ${overLimit ? 'row-danger' : ''}">${f.confidence}% conf.</span>
+  `;
+  row.onclick = () => {
+    document.getElementById('detail-hint').textContent = f.name + ': ' + f.requests.length + ' pending requests, ' + totalRequested + ' MW total against ' + f.firm + ' MW firm headroom';
+    const panel = document.getElementById('lever-panel');
+    panel.style.display = 'block';
+    panel.innerHTML = `
+      <p class="lever-title">${f.name} — flexibility lever</p>
+      <p class="lever-desc">${f.lever}</p>
+      <div class="lever-row">
+        <label class="lever-label">Curtailment hrs/yr</label>
+        <input type="range" min="0" max="60" value="25" step="5" oninput="this.nextElementSibling.textContent = this.value">
+        <span class="lever-value">25</span>
+      </div>
+    `;
+  };
+  rows.appendChild(row);
+});
+</script>
+</body>
+</html>

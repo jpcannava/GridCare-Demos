@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find power now — capacity dashboard (developer view)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #0E1A24;
+    --bg-card: #16242F;
+    --bg-card-2: #1C2C38;
+    --text-primary: #EDEEF0;
+    --text-secondary: #9AA7B0;
+    --text-tertiary: #6B7780;
+    --border: rgba(255,255,255,0.08);
+    --amber: #BA7517;
+    --amber-text: #FAEEDA;
+    --blue: #378ADD;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0; }
+  .subtitle { font-size: 13px; color: var(--text-secondary); margin-left: 8px; }
+  .timestamp { font-size: 12px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  .header-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .meta { font-size: 13px; color: var(--text-secondary); margin: 0 0 1.5rem; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stat-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--border); }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin: 0 0 4px; }
+  .stat-value { font-size: 22px; font-weight: 500; margin: 0; font-family: var(--font-mono); }
+  .legend { display: flex; gap: 16px; align-items: center; margin-bottom: 0.75rem; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--amber); }
+  .swatch-blue { width: 16px; height: 4px; background: repeating-linear-gradient(90deg, var(--blue) 0, var(--blue) 3px, transparent 3px, transparent 6px); }
+  .row {
+    display: grid; grid-template-columns: 110px 1fr 90px; align-items: center; gap: 12px;
+    padding: 10px 8px; border-top: 1px solid var(--border); cursor: pointer;
+  }
+  .row:hover { background: rgba(255,255,255,0.02); }
+  .row-name { font-size: 13px; font-weight: 500; }
+  .row-value { font-size: 13px; font-family: var(--font-mono); text-align: right; }
+  .bar-track { position: relative; height: 22px; background: var(--bg-card-2); border-radius: var(--radius-md); overflow: visible; }
+  .bar-amber { position: absolute; left: 0; top: 0; height: 100%; border-radius: var(--radius-md); background: var(--amber); opacity: 0.9; }
+  .bar-blue { position: absolute; top: 0; height: 100%; border-radius: 0 var(--radius-md) var(--radius-md) 0; background: repeating-linear-gradient(90deg, var(--blue) 0, var(--blue) 3px, transparent 3px, transparent 6px); opacity: 0.85; }
+  .bar-label { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-family: var(--font-mono); color: var(--amber-text); }
+  .hint { font-size: 12px; color: var(--text-tertiary); margin: 0.75rem 0 0; }
+  .detail-panel { font-size: 13px; color: var(--text-secondary); background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; margin-top: 6px; }
+  .footer-note { font-size: 11px; color: var(--text-tertiary); margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-row">
+    <div><span></span><h1 style="display:inline;">Find power now</h1><span class="subtitle">Hillsboro, OR corridor</span></div>
+    <span class="timestamp">Prototype — illustrative data</span>
+  </div>
+  <p class="meta">6 substations modeled · sorted by fastest time-to-power · developer view</p>
+
+  <div class="stats">
+    <div class="stat-card"><p class="stat-label">Fastest site</p><p class="stat-value">3 mo</p></div>
+    <div class="stat-card"><p class="stat-label">Total modeled capacity</p><p class="stat-value">412 MW</p></div>
+    <div class="stat-card"><p class="stat-label">Available now, no conditions</p><p class="stat-value">84 MW</p></div>
+    <div class="stat-card"><p class="stat-label">Sites flagged this week</p><p class="stat-value">2</p></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="swatch"></span>Available now</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--blue); opacity:0.85;"></span>Modeled, pending validation</span>
+    <span class="legend-item"><span class="swatch-blue"></span>Confidence range</span>
+  </div>
+
+  <div id="rows"></div>
+  <p class="hint" id="detail-hint">Click a substation to see what its capacity depends on.</p>
+
+  <p class="footer-note">Prototype built to explore a data-center-developer view of grid capacity data. Illustrative figures only, not real GridCARE platform data.</p>
+</div>
+
+<script>
+const sites = [
+  { name: 'Cornelius Pass', months: 3, available: 28, modeled: 12, condition: 'No conditions — firm capacity', detail: 'Validated against 18 months of feeder telemetry. No curtailment terms attached.' },
+  { name: 'Brookwood', months: 4, available: 22, modeled: 18, condition: 'Curtailment up to 40 hrs/yr', detail: 'Capacity holds except during named peak events, expected 30 to 45 hours per year based on 5-year load history.' },
+  { name: 'Evergreen', months: 6, available: 18, modeled: 26, condition: 'Pending battery interconnection', detail: 'Firm once a 12 MW storage asset finishes commissioning, expected this quarter.' },
+  { name: 'North Plains', months: 9, available: 16, modeled: 31, condition: 'Seasonal, summer only', detail: 'Capacity exists April through October when cooling load on this feeder drops. Winter is tight.' },
+  { name: 'Helvetia', months: 11, available: 0, modeled: 38, condition: 'Awaiting feeder upgrade', detail: 'Substation transformer upgrade in progress. No usable capacity until upgrade completes.' },
+  { name: 'Reeder Road', months: 14, available: 0, modeled: 44, condition: 'Queue position 3 of 5', detail: 'Capacity exists but is allocated to interconnection queue ahead of this request.' }
+];
+
+const maxMonths = 15;
+const rows = document.getElementById('rows');
+
+sites.forEach((s) => {
+  const total = s.available + s.modeled;
+  const barWidthPct = Math.min(100, (s.months / maxMonths) * 100);
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `
+    <span class="row-name">${s.name}</span>
+    <div class="bar-track">
+      <div class="bar-amber" style="width:${barWidthPct}%;"></div>
+      <div class="bar-blue" style="left:${barWidthPct}%; width:${Math.min(100 - barWidthPct, 18)}%;"></div>
+      <span class="bar-label">${s.months} mo</span>
+    </div>
+    <span class="row-value">${total} MW</span>
+  `;
+  row.onclick = () => {
+    document.querySelectorAll('.detail-panel').forEach(el => el.remove());
+    document.getElementById('detail-hint').textContent = s.name + ': ' + s.condition;
+    const panel = document.createElement('div');
+    panel.className = 'detail-panel';
+    panel.textContent = s.detail;
+    row.after(panel);
+  };
+  rows.appendChild(row);
+});
+</script>
+</body>
+</html>
